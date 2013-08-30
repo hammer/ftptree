@@ -23,7 +23,7 @@
             // functions to handle state
             function get_dropdown_site() {
                 var dropdown = d3.select("select")[0][0];
-                return dropdown.children[dropdown.selectedIndex].__data__.host;
+                return dropdown.children[dropdown.selectedIndex].__data__.id;
             }
             
             function set_dropdown_site(h) {
@@ -107,7 +107,7 @@
                         .enter()
                         .append("g")
                         .append("a")
-                            .attr("xlink:href", function(d) { return "/#" + d.host + "/" + d.path; });
+                            .attr("xlink:href", function(d) { return "/#" + host + "/" + d.path; });
                     d3.select("svg").selectAll("a")
                         .append("rect")
                             .attr("x", function(d) { return d.x; })
@@ -162,7 +162,7 @@
                 
                 // populate dropdown item to idx mapping
                 for (var i = 0; i < dropdown[0][0].children.length; i++) {
-                    host2idx[dropdown[0][0].children[i].__data__.host] = i;
+                    host2idx[dropdown[0][0].children[i].__data__.id] = i;
                 }
                 
                 // Set initial state

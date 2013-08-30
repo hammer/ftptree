@@ -16,12 +16,12 @@ with open('sites.json', 'r') as ip:
 
 def load_cache():
     for site in sites:
-        cache[site['host']] = {'meta': site}
+        cache[site['id']] = {'meta': site}
         data_path = site['treefile']
         try:
             with open(data_path, 'r') as ip:
                 tree = json.load(ip)
-                cache[site['host']]['tree'] = tree
+                cache[site['id']]['tree'] = tree
         except IOError:
             continue
 
@@ -95,14 +95,14 @@ def site_list():
     response.content_type = 'application/json'
     return json.dumps(sites)
 
-@app.route('/layout/<ftp_host>')
-@app.route('/layout/<ftp_host>/')
-@app.route('/layout/<ftp_host>/<path:path>')
-def tree_layout(ftp_host, path=''):
+@app.route('/layout/<id>')
+@app.route('/layout/<id>/')
+@app.route('/layout/<id>/<path:path>')
+def tree_layout(id, path=''):
     response.content_type = 'application/json'
     
     # get node metadata
-    tree = get_tree(cache[ftp_host]['tree'], path)
+    tree = get_tree(cache[id]['tree'], path)
     children = tree['children'].keys()
     sizes = [tree['children'][child]['size'] for child in children]
     
@@ -121,7 +121,7 @@ def tree_layout(ftp_host, path=''):
     
     # annotate rects with some metadata
     for (child, rect) in zip(children, rects):
-        rect['host'] = ftp_host
+        rect['host'] = cache[id]['meta']['host']
         rect['path'] = os.path.join(path, child)
         rect['name'] = child
         rect['size'] = bytes2human(tree['children'][child]['size'])
@@ -135,7 +135,7 @@ def tree_layout(ftp_host, path=''):
     if len(rects) == 0:
         rects.append({'x': 0, 'y': 0,
                       'dx': width, 'dy': height,
-                      'host': ftp_host, 'path': path, 'name': path.split('/')[-1],
+                      'host': cache[id]['meta']['host'], 'path': path, 'name': path.split('/')[-1],
                       'size': bytes2human(tree['size']),
                       'type': 'file'})
     
@@ -143,7 +143,7 @@ def tree_layout(ftp_host, path=''):
     data['rects'] = rects
     data['size'] = tree['size']
     data['humansize'] = bytes2human(tree['size'])
-    data['date'] = cache[ftp_host]['tree']['date']
+    data['date'] = cache[id]['tree']['date']
     
     return json.dumps(data)
 
